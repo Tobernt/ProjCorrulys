@@ -9,6 +9,20 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+# Ignore Unity-generated files
+/Library/
+/Logs/
+/Temp/
+/obj/
+/UserSettings/
+/Builds/
+
+# Ignore local project settings
+/Assets/Plugins/
+/Assets/StreamingAssets/
+*.csproj
+*.sln
+*.unitypackage
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
