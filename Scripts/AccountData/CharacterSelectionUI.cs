@@ -1,67 +1,91 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CharacterSelectionUI : MonoBehaviour
 {
-    public static CharacterSelectionUI Instance { get; private set; }
-
-    public CharacterStorage characterStorage;
     public Transform characterListContainer;
     public GameObject characterSlotPrefab;
-    public Button loadCharacterButton;
+    public InputField characterNameInput;
+    public Button createButton, deleteButton, loadButton;
 
-    private CharacterData selectedCharacter;
-
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-    }
+    private List<CharacterSlot> characterSlots = new List<CharacterSlot>();
 
     private void Start()
     {
-        PopulateCharacterList();
-        loadCharacterButton.onClick.AddListener(LoadSelectedCharacter);
+        createButton.onClick.AddListener(CreateCharacter);
+        loadButton.onClick.AddListener(LoadSelectedCharacter);
+        deleteButton.onClick.AddListener(DeleteSelectedCharacter);
+        RefreshCharacterList();
     }
 
-    public void PopulateCharacterList()
+    // ✅ Load characters into UI
+    private void RefreshCharacterList()
     {
-        foreach (Transform child in characterListContainer) Destroy(child.gameObject);
+        // Clear existing slots
+        foreach (Transform child in characterListContainer)
+            Destroy(child.gameObject);
 
-        List<CharacterData> characters = characterStorage.GetCharacters();
+        characterSlots.Clear();
 
+        List<CharacterData> characters = CharacterData.GetAllCharacters();
         foreach (CharacterData character in characters)
         {
-            GameObject slot = Instantiate(characterSlotPrefab, characterListContainer);
-            slot.GetComponentInChildren<Text>().text = $"{character.characterName} (Level {character.level})";
-
-            Button button = slot.GetComponent<Button>();
-            button.onClick.AddListener(() => SelectCharacter(character));
+            GameObject slotObj = Instantiate(characterSlotPrefab, characterListContainer);
+            CharacterSlot slot = slotObj.GetComponent<CharacterSlot>();
+            slot.Initialize(character, this); // ✅ Fix: Pass the CharacterData directly
+            characterSlots.Add(slot);
         }
+
+        Debug.Log($"✅ Loaded {characters.Count} characters.");
     }
 
-    private void SelectCharacter(CharacterData character)
+    // ✅ Create new character
+    private void CreateCharacter()
     {
-        selectedCharacter = character;
-        Debug.Log($"Selected character: {character.characterName}");
-    }
-
-    public void LoadSelectedCharacter()
-    {
-        if (!string.IsNullOrEmpty(selectedCharacter.characterId))
+        string name = characterNameInput.text;
+        if (string.IsNullOrWhiteSpace(name))
         {
-            Debug.Log($"Loading {selectedCharacter.characterName}...");
-            NetworkCharacterManager.Instance.CmdSelectCharacter(selectedCharacter);
+            Debug.LogError("❌ Character name cannot be empty!");
+            return;
+        }
+
+        CharacterData newCharacter = new CharacterData(name, 1, 100);
+        newCharacter.Save();
+        RefreshCharacterList();
+    }
+
+    // ✅ Load selected character
+    private void LoadSelectedCharacter()
+    {
+        if (PlayerPrefs.HasKey("SelectedCharacter"))
+        {
+            string selectedName = PlayerPrefs.GetString("SelectedCharacter");
+            Debug.Log($"✅ Loading character: {selectedName}");
+            // Proceed to the next scene here (Mirror logic)
         }
         else
         {
-            Debug.LogWarning("No character selected!");
+            Debug.LogError("❌ No character selected!");
         }
     }
 
-    public void ConfirmCharacterSelection(CharacterData character)
+    // ✅ Delete selected character
+    private void DeleteSelectedCharacter()
     {
-        Debug.Log($"Character {character.characterName} loaded successfully!");
-        // Transition to the game scene or apply character data
+        if (PlayerPrefs.HasKey("SelectedCharacter"))
+        {
+            string selectedName = PlayerPrefs.GetString("SelectedCharacter");
+            CharacterData.DeleteCharacter(selectedName);
+            RefreshCharacterList();
+            PlayerPrefs.DeleteKey("SelectedCharacter");
+        }
+    }
+
+    // ✅ Set selected character
+    public void SelectCharacter(string characterName)
+    {
+        PlayerPrefs.SetString("SelectedCharacter", characterName);
+        Debug.Log($"✅ Selected character: {characterName}");
     }
 }

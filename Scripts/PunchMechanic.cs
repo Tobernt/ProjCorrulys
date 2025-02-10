@@ -1,4 +1,4 @@
-using Mirror;
+﻿using Mirror;
 using UnityEngine;
 
 public class PunchMechanic : NetworkBehaviour
@@ -14,6 +14,9 @@ public class PunchMechanic : NetworkBehaviour
     [Header("Lift Settings")]
     public Transform holdPosition;       // Position where the dummy will be held
     private GameObject liftedObject;     // The currently lifted object
+    [Header("Lift Settings")]
+    [SerializeField] private float maxHoldDistance = 3f; // ✅ Drop if object moves too far
+    [SerializeField] private float objectFollowStrength = 10f; // ✅ Controls how tightly it follows
 
     private float lastPunchTime = -1f;
     private Animator animator;
@@ -41,18 +44,31 @@ public class PunchMechanic : NetworkBehaviour
         }
     }
 
-    void Update()
+    private void Update()
     {
         if (!isLocalPlayer) return;
 
-        // Left-click to punch
+        // Lifted object logic
+        if (liftedObject != null)
+        {
+            MoveLiftedObject();
+
+            // Check if it should be dropped
+            if (Vector3.Distance(liftedObject.transform.position, holdPosition.position) > maxHoldDistance)
+            {
+                Debug.Log("[PunchMechanic] Lifted object moved too far. Dropping...");
+                DropObject();
+            }
+        }
+
+        // Punch
         if (Input.GetMouseButtonDown(0) && Time.time >= lastPunchTime + punchCooldown)
         {
             PerformPunch();
             lastPunchTime = Time.time;
         }
 
-        // Right-click to lift or drop an object
+        // Lift/Drop
         if (Input.GetMouseButtonDown(1))
         {
             if (liftedObject == null)
@@ -65,7 +81,20 @@ public class PunchMechanic : NetworkBehaviour
             }
         }
     }
+    private void MoveLiftedObject()
+    {
+        if (liftedObject == null) return;
 
+        // ✅ Apply smooth movement instead of parenting
+        Vector3 targetPosition = holdPosition.position;
+        Vector3 moveDirection = (targetPosition - liftedObject.transform.position);
+
+        Rigidbody rb = liftedObject.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = moveDirection * objectFollowStrength; // ✅ Smooth following
+        }
+    }
     private void PerformPunch()
     {
         Debug.Log("[PunchMechanic] Attempting to punch...");
@@ -111,38 +140,6 @@ public class PunchMechanic : NetworkBehaviour
         return playerCamera != null ? playerCamera.transform.forward : transform.forward;
     }
 
-    private void TryLiftObject()
-    {
-        if (liftedObject != null)
-        {
-            Debug.Log("[PunchMechanic] Already holding an object. Cannot lift another.");
-            return;
-        }
-
-        Debug.Log("[PunchMechanic] Attempting to lift an object...");
-
-        GameObject target = FindClosestPunchable();
-        if (target != null)
-        {
-            Debug.Log($"[PunchMechanic] Lifting object: {target.name}");
-            CmdRequestLiftObject(target);
-        }
-        else
-        {
-            Debug.Log("[PunchMechanic] No objects to lift within range.");
-        }
-    }
-
-    private void DropObject()
-    {
-        if (liftedObject != null)
-        {
-            Debug.Log($"[PunchMechanic] Dropping object: {liftedObject.name}");
-            CmdRequestDropObject(liftedObject);
-            liftedObject = null; // Reset the lifted object reference locally
-        }
-    }
-
     private GameObject FindClosestPunchable()
     {
         GameObject[] punchableObjects = GameObject.FindGameObjectsWithTag("Punchable");
@@ -186,7 +183,26 @@ public class PunchMechanic : NetworkBehaviour
             health.TakeDamage((int)punchDamage);
         }
 
-        RpcPunchEffect(targetObject.transform.position, targetObject);
+        RpcPunchEffect(targetObject, direction);
+    }
+    private void TryLiftObject()
+    {
+        if (liftedObject != null)
+        {
+            Debug.Log("[PunchMechanic] Already holding an object. Cannot lift another.");
+            return;
+        }
+
+        GameObject target = FindClosestPunchable();
+        if (target != null)
+        {
+            Debug.Log($"[PunchMechanic] Lifting object: {target.name}");
+            CmdRequestLiftObject(target);
+        }
+        else
+        {
+            Debug.Log("[PunchMechanic] No objects to lift within range.");
+        }
     }
 
     [Command]
@@ -202,6 +218,29 @@ public class PunchMechanic : NetworkBehaviour
         }
     }
 
+    [ClientRpc]
+    private void RpcLiftObject(GameObject targetObject)
+    {
+        if (targetObject == null) return;
+
+        liftedObject = targetObject;
+        Rigidbody rb = liftedObject.GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            rb.useGravity = false;  // ✅ Disable gravity while lifting
+            rb.drag = 10f;          // ✅ Increase drag for smoother control
+        }
+    }
+    private void DropObject()
+    {
+        if (liftedObject != null)
+        {
+            Debug.Log($"[PunchMechanic] Dropping object: {liftedObject.name}");
+            CmdRequestDropObject(liftedObject);
+            liftedObject = null;
+        }
+    }
 
     [Command]
     private void CmdRequestDropObject(GameObject targetObject)
@@ -213,6 +252,25 @@ public class PunchMechanic : NetworkBehaviour
         {
             targetNetIdentity.RemoveClientAuthority();
             RpcDropObject(targetObject);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcDropObject(GameObject targetObject)
+    {
+        if (targetObject != null)
+        {
+            Rigidbody rb = targetObject.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.useGravity = true;  // ✅ Re-enable gravity on drop
+                rb.drag = 1f;          // ✅ Reset drag to normal
+            }
+
+            if (targetObject == liftedObject)
+            {
+                liftedObject = null;
+            }
         }
     }
 
@@ -232,34 +290,17 @@ public class PunchMechanic : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcLiftObject(GameObject targetObject)
+    private void RpcPunchEffect(GameObject hitObject, Vector3 direction)
     {
-        if (targetObject == null) return;
+        if (hitObject == null) return;
 
-        targetObject.transform.SetParent(holdPosition);
-        targetObject.transform.localPosition = Vector3.zero;
-        targetObject.transform.localRotation = Quaternion.identity;
-
-        liftedObject = targetObject;
-    }
-
-    [ClientRpc]
-    private void RpcDropObject(GameObject targetObject)
-    {
-        if (targetObject != null)
+        Rigidbody rb = hitObject.GetComponent<Rigidbody>();
+        if (rb != null)
         {
-            targetObject.transform.SetParent(null);
-
-            if (targetObject == liftedObject)
-            {
-                liftedObject = null;
-            }
+            rb.isKinematic = false;
+            rb.AddForce(direction * punchForce, ForceMode.Impulse);
         }
-    }
 
-    [ClientRpc]
-    private void RpcPunchEffect(Vector3 hitPoint, GameObject hitObject)
-    {
-        Debug.Log($"[Client] Punch effect on: {hitObject.name} at {hitPoint}");
+        Debug.Log($"[Client] Punch effect on: {hitObject.name}");
     }
 }

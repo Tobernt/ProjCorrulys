@@ -1,16 +1,21 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class ItemSO : ScriptableObject
 {
-    public string itemId;          // Unique ID for the item
-    public string itemName;        // Name of the item
-    public string itemDescription; // Description of the item
-    public Sprite itemIcon;        // Icon for UI display
-    public ItemType itemType;      // Type of the item
-    public bool isStackable;       // Can the item stack?
-    public int maxStackSize;       // Maximum stack size
-    public GameObject itemPrefab;  // **Prefab reference for 3D equipment**
+    public string itemId;
+    public string itemName;
+    public string itemDescription;
+    public Sprite itemIcon;
+    public ItemType itemType;
+    public bool isStackable;
+    public int maxStackSize;
+    public GameObject itemPrefab;
+
+    public int damage;
+    public float attackSpeed;
+    public int defense;
+    public RarityType rarity;
 
     public enum ItemType
     {
@@ -18,6 +23,25 @@ public class ItemSO : ScriptableObject
         Equipment,
         Component,
         QuestItem,
-        Misc
+        Misc,
+        Helmet,
+        Gloves,
+        Chest,
+        Legs,
+        Boots,
+        Weapon,
+        Shield,
+        Necklace,
+        Ring
+    }
+
+
+    public enum RarityType
+    {
+        Common,
+        Uncommon,
+        Rare,
+        Epic,
+        Legendary
     }
 }

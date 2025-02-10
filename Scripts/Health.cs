@@ -23,7 +23,7 @@ public class Health : NetworkBehaviour
         }
     }
 
-    [ClientRpc]
+    [Server]
     void RpcDie()
     {
         Debug.Log($"{gameObject.name} has died!");

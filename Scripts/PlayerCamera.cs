@@ -12,13 +12,19 @@ namespace CustomNamespace
         public Vector3 offset = new Vector3(0f, 3f, -8f); // Third-person offset
         public Vector3 rotation = new Vector3(10f, 0f, 0f); // Default rotation
         public float sensitivity = 2f; // Sensitivity for mouse movement
-
         private float verticalRotation = 0f; // Tracks up-and-down rotation
 
         void Awake()
         {
             mainCam = Camera.main;
         }
+
+
+        public float GetVerticalRotation()
+        {
+            return verticalRotation;
+        }
+
 
         public override void OnStartLocalPlayer()
         {
