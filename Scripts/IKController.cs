@@ -14,7 +14,7 @@ public class IKController : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         rigBuilder = GetComponentInChildren<RigBuilder>();
-        StartCoroutine(InitializeCamera()); // ✅ Delayed initialization
+        StartCoroutine(InitializeCamera()); // Delayed initialization
     }
 
     private System.Collections.IEnumerator InitializeCamera()
@@ -35,7 +35,7 @@ public class IKController : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer || cameraTransform == null) return; // ✅ Prevent null reference
+        if (!isLocalPlayer || cameraTransform == null) return; // Prevent null reference
 
         // Calculate new AimTarget position based on camera
         Vector3 newAimPosition = cameraTransform.position + cameraTransform.forward * 10f;

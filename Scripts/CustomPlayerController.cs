@@ -278,7 +278,7 @@ namespace CustomNamespace
 
             Debug.Log($"✅ Player exited to {exitPosition}. isMounted: {isMounted}");
 
-            // ✅ Re-enable physics after a short delay
+            // Re-enable physics after a short delay
             StartCoroutine(EnablePhysicsAfterDelay(0.1f));
         }
 
@@ -288,7 +288,7 @@ namespace CustomNamespace
             RpcSetPhysics(true);
         }
 
-        // ✅ The player sends a command to request entry into a car
+        // The player sends a command to request entry into a car
         [Command(requiresAuthority = false)]
         private void CmdTryEnterCar()
         {
@@ -307,7 +307,7 @@ namespace CustomNamespace
             }
         }
 
-        // ✅ The player sends a command to exit the car
+        // The player sends a command to exit the car
         [Command(requiresAuthority = false)]
         private void CmdExitCar()
         {

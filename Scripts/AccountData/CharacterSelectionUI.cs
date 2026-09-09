@@ -19,7 +19,7 @@ public class CharacterSelectionUI : MonoBehaviour
         RefreshCharacterList();
     }
 
-    // ✅ Load characters into UI
+    // Load characters into UI
     private void RefreshCharacterList()
     {
         // Clear existing slots
@@ -33,14 +33,14 @@ public class CharacterSelectionUI : MonoBehaviour
         {
             GameObject slotObj = Instantiate(characterSlotPrefab, characterListContainer);
             CharacterSlot slot = slotObj.GetComponent<CharacterSlot>();
-            slot.Initialize(character, this); // ✅ Fix: Pass the CharacterData directly
+            slot.Initialize(character, this);
             characterSlots.Add(slot);
         }
 
         Debug.Log($"✅ Loaded {characters.Count} characters.");
     }
 
-    // ✅ Create new character
+    // Create new character
     private void CreateCharacter()
     {
         string name = characterNameInput.text;
@@ -55,7 +55,7 @@ public class CharacterSelectionUI : MonoBehaviour
         RefreshCharacterList();
     }
 
-    // ✅ Load selected character
+    // Load selected character
     private void LoadSelectedCharacter()
     {
         if (PlayerPrefs.HasKey("SelectedCharacter"))
@@ -70,7 +70,7 @@ public class CharacterSelectionUI : MonoBehaviour
         }
     }
 
-    // ✅ Delete selected character
+    // Delete selected character
     private void DeleteSelectedCharacter()
     {
         if (PlayerPrefs.HasKey("SelectedCharacter"))
@@ -82,7 +82,7 @@ public class CharacterSelectionUI : MonoBehaviour
         }
     }
 
-    // ✅ Set selected character
+    // Set selected character
     public void SelectCharacter(string characterName)
     {
         PlayerPrefs.SetString("SelectedCharacter", characterName);

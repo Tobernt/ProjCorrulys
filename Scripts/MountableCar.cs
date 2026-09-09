@@ -16,13 +16,13 @@ public class MountableCar : NetworkBehaviour
     [SerializeField] private Rigidbody carRigidbody;
     [SerializeField] private float accelerationForce = 500f;
     [SerializeField] private float maxSpeed = 20f;
-    [SerializeField] private float turnTorque = 50f; // 🔹 Reduced turning force
-    [SerializeField] private float minTurnFactor = 0.2f; // 🔹 Less turn at low speeds
-    [SerializeField] private float dragFactor = 0.98f; // 🔹 Simulates friction/drag
+    [SerializeField] private float turnTorque = 50f; // Reduced turning force
+    [SerializeField] private float minTurnFactor = 0.2f; // Less turn at low speeds
+    [SerializeField] private float dragFactor = 0.98f; // Simulates friction/drag
     [Header("Ground Check Settings")]
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float raycastDistance = 2.0f; // ✅ Editable Raycast Distance
-    [SerializeField] private float raycastOffsetY = 0.5f;  // ✅ Editable Start Offset
+    [SerializeField] private float raycastDistance = 2.0f; // Editable Raycast Distance
+    [SerializeField] private float raycastOffsetY = 0.5f;  // Editable Start Offset
     [SyncVar] private bool isGrounded;
 
     [SyncVar(hook = nameof(OnDriverChanged))] private NetworkIdentity currentDriver;
@@ -56,7 +56,7 @@ public class MountableCar : NetworkBehaviour
         }
 
         Vector3 startPosition = transform.position + Vector3.up * raycastOffsetY;
-        float sphereRadius = 0.5f; // ✅ Adjustable SphereCast radius
+        float sphereRadius = 0.5f; // Adjustable SphereCast radius
         float castDistance = raycastDistance;
 
         RaycastHit hit;
@@ -68,7 +68,7 @@ public class MountableCar : NetworkBehaviour
             ? $"✅ Car Ground Detected! Hit: {hit.collider?.name}, Distance: {hit.distance}"
             : "❌ No ground detected!");
 
-        // ✅ Draw debug sphere
+        // Draw debug sphere
         Debug.DrawRay(startPosition, Vector3.down * castDistance, isGrounded ? Color.green : Color.red, 0.1f);
     }
 
@@ -104,7 +104,7 @@ public class MountableCar : NetworkBehaviour
         {
             if (seatOccupied[i])
             {
-                // 🔹 Ensure seat is actually occupied (removes disconnected players)
+                // Ensure seat is actually occupied (removes disconnected players)
                 if (!IsSeatActuallyOccupied(i))
                 {
                     seatOccupied[i] = false;
@@ -116,7 +116,7 @@ public class MountableCar : NetworkBehaviour
                 }
             }
 
-            // 🔹 Assign seat properly
+            // Assign seat properly
             seatOccupied[i] = true;
             player.currentSeatIndex = i;
             player.isMounted = true;
@@ -168,16 +168,16 @@ public class MountableCar : NetworkBehaviour
 
             seatOccupied[seatIndex] = false;
 
-            // ✅ Get seat transform
+            // Get seat transform
             Transform seatTransform = seats[seatIndex];
 
-            // ✅ Determine exit direction based on seat index (Even = Right, Odd = Left)
+            // Determine exit direction based on seat index (Even = Right, Odd = Left)
             Vector3 exitOffset = (seatIndex % 2 == 0) ? seatTransform.right : -seatTransform.right;
             Vector3 exitPosition = seatTransform.position + (exitOffset * -2f) + (Vector3.up * 1.5f);
 
             Debug.Log($"🚪 Player exiting {((seatIndex % 2 == 0) ? "right" : "left")} from seat {seatIndex} to {exitPosition}");
 
-            // ✅ Move player out of car
+            // Move player out of car
             player.RpcDismountCar(exitPosition);
 
             // Reset player's parent

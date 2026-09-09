@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
 using Mirror;
-using CustomNamespace; // ✅ Ensure correct namespace is included
+using CustomNamespace; // Ensure correct namespace is included
 
 public class PlayerLook : NetworkBehaviour
 {
@@ -19,7 +19,7 @@ public class PlayerLook : NetworkBehaviour
 
         if (playerCamera == null)
         {
-            playerCamera = GetComponent<CustomNamespace.PlayerCamera>(); // ✅ Correctly reference PlayerCamera
+            playerCamera = GetComponent<CustomNamespace.PlayerCamera>(); // Correctly reference PlayerCamera
             if (playerCamera == null)
             {
                 Debug.LogError("PlayerLook: PlayerCamera component is missing!");

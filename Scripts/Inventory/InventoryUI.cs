@@ -14,7 +14,7 @@ public class InventoryUI : MonoBehaviour
 
     private void Start()
     {
-        // ✅ Start retrying until we find the player's inventory
+        // Start retrying until we find the player's inventory
         InvokeRepeating(nameof(FindPlayerInventory), 0.5f, 1.0f);
 
         if (inventoryPanel == null)
@@ -70,7 +70,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (playerInventory == null)
         {
-            playerInventory = FindObjectOfType<Inventory>(); // 🔄 Try to find inventory again
+            playerInventory = FindObjectOfType<Inventory>(); // Try to find inventory again
             if (playerInventory == null)
             {
                 Debug.LogWarning("⚠ Inventory not found! Retrying...");

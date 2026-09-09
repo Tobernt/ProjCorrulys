@@ -19,7 +19,7 @@ public class InventorySaveSystem : MonoBehaviour
         {
             data.slots.Add(new InventorySlotData
             {
-                itemId = slot.itemId, // ✅ Use itemId instead of ItemSO
+                itemId = slot.itemId, // Use itemId instead of ItemSO
                 quantity = slot.quantity
             });
         }

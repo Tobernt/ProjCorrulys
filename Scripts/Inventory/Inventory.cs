@@ -81,12 +81,12 @@ public class Inventory : NetworkBehaviour
         if (characterData.Inventory == null)
         {
             Debug.LogWarning($"⚠ {characterName} has no inventory data! Starting with an empty inventory.");
-            return; // ❌ No need to clear SyncList, just keep it empty
+            return; // No need to clear SyncList, just keep it empty
         }
 
         Debug.Log($"✅ Inventory Loaded for {characterName}. Items: {characterData.Inventory.Count}");
 
-        // ✅ Call a server command to correctly load inventory
+        // Call a server command to correctly load inventory
         CmdReloadInventory(characterData.Inventory);
     }
 
@@ -109,7 +109,7 @@ public class Inventory : NetworkBehaviour
 
         SaveCharacterInventory();
 
-        // ✅ Pass the updated inventory list to client
+        // Pass the updated inventory list to client
         TargetReloadClientInventory(sender, slots.ToList());
     }
 
@@ -121,13 +121,13 @@ public class Inventory : NetworkBehaviour
 
         Debug.Log($"🔄 Client-Side Inventory Reload Triggered");
 
-        slots.Clear(); // ✅ Client modifies SyncList (Allowed)
+        slots.Clear(); // Client modifies SyncList (Allowed)
         foreach (var slot in newInventory)
         {
-            slots.Add(new InventorySlot(slot.itemId, slot.quantity)); // ✅ Client modifies SyncList (Allowed)
+            slots.Add(new InventorySlot(slot.itemId, slot.quantity)); // Client modifies SyncList (Allowed)
         }
 
-        UpdateInventoryUI(); // ✅ Ensure UI is updated
+        UpdateInventoryUI(); // Ensure UI is updated
     }
 
 
@@ -145,13 +145,13 @@ public class Inventory : NetworkBehaviour
 
         SaveCharacterInventory();
 
-        // ✅ Pass the updated inventory list to client
+        // Pass the updated inventory list to client
         TargetReloadClientInventory(sender, slots.ToList());
     }
 
     private void ReloadCharacterData()
     {
-        if (!isLocalPlayer) return; // ✅ Ensure only the local player runs this
+        if (!isLocalPlayer) return; // Ensure only the local player runs this
 
         if (string.IsNullOrEmpty(characterName))
         {
@@ -167,18 +167,18 @@ public class Inventory : NetworkBehaviour
 
         Debug.Log($"🔄 Reloading character data for {characterName}...");
 
-        // ✅ Call a [Command] to update SyncList safely
+        // Call a [Command] to update SyncList safely
         CmdReloadInventory(characterData.Inventory);
 
-        // ✅ Update UI
+        // Update UI
         UpdateInventoryUI();
     }
 
     [Command(requiresAuthority = false)]
     private void CmdReloadInventory(List<InventorySlot> newInventory, NetworkConnectionToClient sender = null)
     {
-        // ✅ Pass inventory data correctly
-        TargetReloadClientInventory(sender, newInventory); // ✅ Now passes `newInventory`
+        // Pass inventory data correctly
+        TargetReloadClientInventory(sender, newInventory); // Now passes `newInventory`
     }
 
 
@@ -240,7 +240,7 @@ public class Inventory : NetworkBehaviour
 
         CmdAddItem(pickupItem.itemId, pickupItem.quantity);
 
-        // ✅ Call the destroy function on PickupItem
+        // Call the destroy function on PickupItem
         pickupItem.CmdDestroyPickup();
         }
 
@@ -248,20 +248,20 @@ public class Inventory : NetworkBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!isOwned) return; // ✅ Ensure only the local player picks up
+        if (!isOwned) return; // Ensure only the local player picks up
 
         PickupItem pickupItem = other.GetComponent<PickupItem>();
         if (pickupItem != null && !recentlyPickedUp.Contains(pickupItem))
         {
             Debug.Log($"🔹 {name} collided with a pickup item.");
 
-            // ✅ Add to recently picked up items to prevent duplicates
+            // Add to recently picked up items to prevent duplicates
             recentlyPickedUp.Add(pickupItem);
 
-            // ✅ Call pickup command
+            // Call pickup command
             CmdPickupItem(pickupItem.netIdentity);
 
-            // ✅ Remove from tracking after a short delay
+            // Remove from tracking after a short delay
             StartCoroutine(RemoveFromPickupCooldown(pickupItem));
         }
     }
@@ -283,19 +283,19 @@ public class Inventory : NetworkBehaviour
             return;
         }
 
-        // ✅ Remove item from inventory
+        // Remove item from inventory
         CmdRemoveItem(itemId, quantity);
 
-        // ✅ Spawn pickup prefab
+        // Spawn pickup prefab
         GameObject pickupPrefab = Instantiate(Resources.Load<GameObject>("PickupPrefab"));
         PickupItem pickupItem = pickupPrefab.GetComponent<PickupItem>();
 
-        pickupItem.itemId = itemId; // ✅ Set the item's ID
-        pickupItem.quantity = quantity; // ✅ Set quantity
+        pickupItem.itemId = itemId; // Set the item's ID
+        pickupItem.quantity = quantity; // Set quantity
 
         pickupPrefab.transform.position = transform.position + Vector3.forward * 1.5f;
 
-        // ✅ Spawn on network
+        // Spawn on network
         NetworkServer.Spawn(pickupPrefab);
 
         Debug.Log($"✅ {characterName} dropped {quantity}x {itemId}");

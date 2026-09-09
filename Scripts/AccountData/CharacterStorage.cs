@@ -11,7 +11,7 @@ public class CharacterStorage : NetworkBehaviour
 
     public List<CharacterData> localCharacters = new List<CharacterData>(); // Local storage
 
-    // ✅ Use a **SyncListCharacterData** instead of a List<CharacterData>
+    // Use a SyncListCharacterData instead of a List<CharacterData>
     public class SyncListCharacterData : SyncList<CharacterData> { }
     public readonly SyncListCharacterData serverCharacters = new SyncListCharacterData(); // Server storage
 

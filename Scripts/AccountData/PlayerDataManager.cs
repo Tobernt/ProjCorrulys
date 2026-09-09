@@ -18,7 +18,7 @@ public class PlayerDataManager : NetworkBehaviour
 
         LoadCharacterData();
 
-        // ✅ Ensure inventory is loaded after character data
+        // Ensure inventory is loaded after character data
         Inventory inventory = GetComponent<Inventory>();
         if (inventory != null)
         {
@@ -53,12 +53,12 @@ public class PlayerDataManager : NetworkBehaviour
         level = data.Level;
         health = data.Health;
 
-        // ✅ Apply inventory data
+        // Apply inventory data
         inventory = GetComponent<Inventory>();
         if (inventory != null)
         {
             Debug.Log("✅ Inventory Component Found in PlayerDataManager!");
-            inventory.LoadInventory(); // ✅ Use LoadInventory() instead of LoadInventoryData()
+            inventory.LoadInventory(); // Use LoadInventory() instead of LoadInventoryData()
         }
         else
         {

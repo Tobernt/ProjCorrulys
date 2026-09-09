@@ -32,7 +32,7 @@ public class PickupItem : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdDestroyPickup()
     {
-        if (!isServer) return; // ✅ Ensure only the server runs this
+        if (!isServer) return; // Ensure only the server runs this
         RpcDestroyPickup();
         NetworkServer.Destroy(gameObject);
     }
